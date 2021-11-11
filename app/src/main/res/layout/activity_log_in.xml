@@ -44,6 +44,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="#FF0000" />
+
+    <EditText
+        android:id="@+id/editTextConfirmPassword"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:inputType="textPassword"
+        android:hint="@string/confirm_password"
+        />
+
+    <TextView
+        android:id="@+id/confirmPasswordErrorTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000" />
+
+    <EditText
+        android:id="@+id/nicknameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="@string/nickname" />
+
     <Button
         android:id="@+id/confirmRegistrationButton"
         android:layout_width="match_parent"

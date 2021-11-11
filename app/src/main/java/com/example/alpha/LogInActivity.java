@@ -43,6 +43,11 @@ public class LogInActivity extends AppCompatActivity {
     private String email;
     private String password;
 
+    private enum ChooseLayout {
+        ACTIVITY_LOG_IN,
+        ACTIVITY_LOG_ON,
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

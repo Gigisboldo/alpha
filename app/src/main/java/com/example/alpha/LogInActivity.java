@@ -1,12 +1,16 @@
 package com.example.alpha;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -14,6 +18,9 @@ import android.widget.Toast;
 
 import com.example.alpha.DbManager.DbManager;
 import com.example.alpha.FirebaseActions.CheckIfEmailExists;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,9 +38,9 @@ public class LogInActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private DbManager db;
-    private boolean connection = false;
-    private Handler mHandler;
     private CheckIfEmailExists checkIfEmailExists;
+    private String email;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,30 +56,100 @@ public class LogInActivity extends AppCompatActivity {
             connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextView);
             confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButton);
             checkIfEmailExists=new CheckIfEmailExists();
-            mHandler = new Handler();
-            startRepeatingTask();
         }catch (Exception e){
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
         }
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
-    public boolean isEmailValid(String email) {
+
+        editTextEmail.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                emailErrorTextView.setText("");
+                if (isEmailValid(editTextEmail.getText().toString())){
+
+                    email = editTextEmail.getText().toString();
+                    emailErrorTextView.setText("");
+                }else{
+
+                    emailErrorTextView.setText(R.string.error_email_not_valid);
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+
+
+                ;
+
+            }
+        });
+
+
+        editTextPassword.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                passwordErrorTextView.setText("");
+                if (isValidPassword(editTextPassword.getText().toString())){
+
+
+                    password = editTextPassword.getText().toString();
+                    passwordErrorTextView.setText("");
+
+                }else{
+
+                    passwordErrorTextView.setText(R.string.error_password_not_valid);
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+
+
+
+
+            }
+        });
+
+        confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+
+
+            }
+        });
+
+    }
+
+    public boolean isEmailValid(String email)
+    {
         String regExpn =
                 "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
-                        + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
-                        + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-                        + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
 
         CharSequence inputStr = email;
 
         Pattern pattern = Pattern.compile(regExpn, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(inputStr);
 
-        if (matcher.matches())
+        if(matcher.matches())
             return true;
         else
             return false;
@@ -92,11 +169,7 @@ public class LogInActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopRepeatingTask();
-    }
+
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -104,39 +177,6 @@ public class LogInActivity extends AppCompatActivity {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
-    Runnable mStatusChecker = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if (isNetworkConnected()) {
-                    connection = true;
-                    connectionInfoTextView.setText("");
-                    confirmRegistrationButton.setClickable(true);
-
-                } else {
-                    connection = false;
-                    connectionInfoTextView.setText(R.string.no_connection_info);
-                    confirmRegistrationButton.setClickable(false);
-
-
-                }
-                //this function can change value of mInterval.
-            } finally {
-                // 100% guarantee that this always happens, even if
-                // your update method throws an exception
-                mHandler.postDelayed(mStatusChecker, mInterval);
-            }
-        }
-    };
-
-    void startRepeatingTask() {
-        mStatusChecker.run();
-    }
-
-    void stopRepeatingTask() {
-        mHandler.removeCallbacks(mStatusChecker);
-    }
 
 
 }
-

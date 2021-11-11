@@ -25,7 +25,7 @@ public class CheckIfEmailExists {
     }
     public void sendRequest(Context context, final String request) {
 
-        String requestUrl = "https://us-central1-helpme-45.cloudfunctions.net/checkIfEmailExists ";
+        String requestUrl = "https://us-central1-alpha-12f6f.cloudfunctions.net/checkIfEmailExists";
         StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl, new Response.Listener<String>() {
 
             @Override

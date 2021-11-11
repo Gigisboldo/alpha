@@ -3,21 +3,15 @@ package com.example.alpha;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,9 +30,7 @@ import java.util.regex.Pattern;
 public class LogInOnActivity extends AppCompatActivity {
 
 
-
     private enum listType {deleteUser, logInUser}
-
     private listType _listType;
     private TextView deleteUser;
     private FirebaseAuth mAuth;
@@ -46,18 +38,10 @@ public class LogInOnActivity extends AppCompatActivity {
     private Button logOnButton;
     private Button logInButton;
     private CursorAdapter adapter;
-
     private DbManager db;
     private ListView usersListView;
     private Intent mainActivityIntent;
-    private EditText editTextEmail;
-    private TextView emailErrorTextView;
-    private EditText editTextPassword;
-    private TextView passwordErrorTextView;
-    private TextView connectionInfoTextView;
-    private Button confirmRegistrationButton;
-    private String email;
-    private String password;
+    private Intent LogInActivityIntent;
 
 
     @Override
@@ -73,6 +57,7 @@ public class LogInOnActivity extends AppCompatActivity {
             logOnButton = (Button) findViewById(R.id.log_on_button);
             deleteUser = (TextView) findViewById(R.id.textViewDelete);
             mainActivityIntent = new Intent(LogInOnActivity.this, MainActivity.class);
+            LogInActivityIntent = new Intent(LogInOnActivity.this, LogInActivity.class);
 
         } catch (Exception e) {
             Toast.makeText(LogInOnActivity.this, e.toString(),
@@ -105,7 +90,7 @@ public class LogInOnActivity extends AppCompatActivity {
             int icount = crs.getCount();
             logInButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-          //TODO go to log in activity
+                    startActivity(LogInActivityIntent);
                 }
             });
             logOnButton.setOnClickListener(new View.OnClickListener() {

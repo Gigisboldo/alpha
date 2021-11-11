@@ -21,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.alpha.DbManager.DatabaseStrings;
 import com.example.alpha.DbManager.DbManager;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,7 +28,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,13 +35,7 @@ import java.util.regex.Pattern;
 
 public class LogInOnActivity extends AppCompatActivity {
 
-    private enum ChooseLayout {
-        ACTIVITY_LOG_IN_ON,
-        ACTIVITY_FIRST_LOG_ON,
-        ACTIVITY_CONFIRM_MAIL,
-        ACTIVITY_CHOOSE_USER_IMAGE,
-        ACTIVITY_LOG_IN,
-    }
+
 
     private enum listType {deleteUser, logInUser}
 
@@ -54,7 +46,7 @@ public class LogInOnActivity extends AppCompatActivity {
     private Button logOnButton;
     private Button logInButton;
     private CursorAdapter adapter;
-    private ChooseLayout choosenLayout;
+
     private DbManager db;
     private ListView usersListView;
     private Intent mainActivityIntent;
@@ -71,7 +63,6 @@ public class LogInOnActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        choosenLayout = ChooseLayout.ACTIVITY_LOG_IN_ON;
         setContentView(R.layout.activity_log_in_on);
         _listType = listType.logInUser;
         try {
@@ -82,12 +73,7 @@ public class LogInOnActivity extends AppCompatActivity {
             logOnButton = (Button) findViewById(R.id.log_on_button);
             deleteUser = (TextView) findViewById(R.id.textViewDelete);
             mainActivityIntent = new Intent(LogInOnActivity.this, MainActivity.class);
-            editTextEmail = (EditText) findViewById(R.id.editTextEmail);
-            emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextView);
-            editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-            passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextView);
-            connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextView);
-            confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButton);
+
         } catch (Exception e) {
             Toast.makeText(LogInOnActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
@@ -119,8 +105,7 @@ public class LogInOnActivity extends AppCompatActivity {
             int icount = crs.getCount();
             logInButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    choosenLayout = ChooseLayout.ACTIVITY_LOG_IN;
-                    setContentView(R.layout.activity_log_in);
+          //TODO go to log in activity
                 }
             });
             logOnButton.setOnClickListener(new View.OnClickListener() {
@@ -188,70 +173,6 @@ public class LogInOnActivity extends AppCompatActivity {
                 });
             }
 
-        } catch (Exception e) {
-            Toast.makeText(LogInOnActivity.this, e.toString(),
-                    Toast.LENGTH_LONG).show();
-        }
-//Procedure to log in user
-        try {
-            editTextEmail.addTextChangedListener(new TextWatcher() {
-
-                public void afterTextChanged(Editable s) {
-                    emailErrorTextView.setText("");
-                    if (isEmailValid(editTextEmail.getText().toString())) {
-
-                        email = editTextEmail.getText().toString();
-                        emailErrorTextView.setText("");
-                    } else {
-
-                        emailErrorTextView.setText(R.string.error_email_not_valid);
-                    }
-                }
-
-                public void beforeTextChanged(CharSequence s, int start,
-                                              int count, int after) {
-                }
-
-                public void onTextChanged(CharSequence s, int start,
-                                          int before, int count) {
-
-
-                    ;
-
-                }
-            });
-            editTextPassword.addTextChangedListener(new TextWatcher() {
-
-                public void afterTextChanged(Editable s) {
-                    passwordErrorTextView.setText("");
-                    if (isValidPassword(editTextPassword.getText().toString())) {
-
-
-                        password = editTextPassword.getText().toString();
-                        passwordErrorTextView.setText("");
-
-                    } else {
-
-                        passwordErrorTextView.setText(R.string.error_password_not_valid);
-                    }
-                }
-
-                public void beforeTextChanged(CharSequence s, int start,
-                                              int count, int after) {
-                }
-
-                public void onTextChanged(CharSequence s, int start,
-                                          int before, int count) {
-
-
-                }
-            });
-
-            confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-
-                }
-            });
         } catch (Exception e) {
             Toast.makeText(LogInOnActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();

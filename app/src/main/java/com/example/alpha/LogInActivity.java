@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.alpha.DbManager.DbManager;
 import com.example.alpha.FirebaseActions.CheckIfEmailExists;
+import com.example.alpha.FirebaseActions.GetUserNickname;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -46,17 +47,17 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
-        try{
+        try {
             db = new DbManager(this);
             mAuth = FirebaseAuth.getInstance();
             editTextEmail = (EditText) findViewById(R.id.editTextEmail);
             emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextView);
-            editTextPassword = (EditText)findViewById(R.id.editTextPassword);
-            passwordErrorTextView= (TextView)findViewById(R.id.passwordErrorTextView);
+            editTextPassword = (EditText) findViewById(R.id.editTextPassword);
+            passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextView);
             connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextView);
             confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButton);
-            checkIfEmailExists=new CheckIfEmailExists();
-        }catch (Exception e){
+            checkIfEmailExists = new CheckIfEmailExists();
+        } catch (Exception e) {
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
         }
@@ -65,91 +66,182 @@ public class LogInActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        try {
 
 
-        editTextEmail.addTextChangedListener(new TextWatcher() {
+            editTextEmail.addTextChangedListener(new TextWatcher() {
 
-            public void afterTextChanged(Editable s) {
-                emailErrorTextView.setText("");
-                if (isEmailValid(editTextEmail.getText().toString())){
-
-                    email = editTextEmail.getText().toString();
+                public void afterTextChanged(Editable s) {
                     emailErrorTextView.setText("");
-                }else{
+                    if (isEmailValid(editTextEmail.getText().toString())) {
 
-                    emailErrorTextView.setText(R.string.error_email_not_valid);
+                        email = editTextEmail.getText().toString();
+                        emailErrorTextView.setText("");
+                    } else {
+
+                        emailErrorTextView.setText(R.string.error_email_not_valid);
+                    }
                 }
-            }
 
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
+                public void beforeTextChanged(CharSequence s, int start,
+                                              int count, int after) {
+                }
 
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-
-
-                ;
-
-            }
-        });
+                public void onTextChanged(CharSequence s, int start,
+                                          int before, int count) {
 
 
-        editTextPassword.addTextChangedListener(new TextWatcher() {
+                    ;
 
-            public void afterTextChanged(Editable s) {
-                passwordErrorTextView.setText("");
-                if (isValidPassword(editTextPassword.getText().toString())){
+                }
+            });
 
 
-                    password = editTextPassword.getText().toString();
+            editTextPassword.addTextChangedListener(new TextWatcher() {
+
+                public void afterTextChanged(Editable s) {
                     passwordErrorTextView.setText("");
+                    if (isValidPassword(editTextPassword.getText().toString())) {
 
-                }else{
 
-                    passwordErrorTextView.setText(R.string.error_password_not_valid);
+                        password = editTextPassword.getText().toString();
+                        passwordErrorTextView.setText("");
+
+                    } else {
+
+                        passwordErrorTextView.setText(R.string.error_password_not_valid);
+                    }
                 }
-            }
 
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
+                public void beforeTextChanged(CharSequence s, int start,
+                                              int count, int after) {
+                }
 
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-
+                public void onTextChanged(CharSequence s, int start,
+                                          int before, int count) {
 
 
+                }
+            });
 
-            }
-        });
+            confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    if (isEmailValid(editTextEmail.getText().toString()) && !editTextEmail.getText().toString().isEmpty()) {
 
-        confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+                        if (isValidPassword(editTextPassword.getText().toString()) && !editTextPassword.getText().toString().isEmpty()) {
+                            mAuth.signInWithEmailAndPassword(editTextEmail.getText().toString(), editTextPassword.getText().toString())
+                                    .addOnCompleteListener(LogInActivity.this, new OnCompleteListener<AuthResult>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                            if (task.isSuccessful()) {
+                                                user = mAuth.getCurrentUser();
+                                                if (user != null) {
+                                                    if (user.isEmailVerified()) {
+                                                        GetUserNickname mGetUserNickname = new GetUserNickname();
+                                                        mGetUserNickname.getUserNickNameInFirestore(user);
+                                                        mGetUserNickname.setListener(new GetUserNickname.GetUserNicknameListener() {
+                                                            @Override
+                                                            public void onPostExecuteConcluded(String nickNameResult) {
+
+                                                                if (nickNameResult.equals("")) {
+                                                                    db.saveNewUser("", user.getUid(), "", editTextEmail.getText().toString(),
+                                                                            editTextPassword.getText().toString());
+                                                                    //TODO go to nickname activity
+                                                                } else {
+                                                                    db.saveNewUser("", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
+
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        db.saveNewUser("", user.getUid(), "", editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                        //TODO start email verify intent
+                                                    }
+
+                                                } else {
+                                                    AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
+                                                    builder.setTitle(R.string.attention);
+                                                    builder.setMessage(R.string.error_log_in);
+                                                    builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+
+                                                        }
+                                                    });
 
 
+                                                    builder.show();
 
-            }
-        });
+                                                }
 
+                                            } else {
+
+                                                checkIfEmailExists.sendRequest(LogInActivity.this, editTextEmail.getText().toString());
+                                                checkIfEmailExists.setListener(new CheckIfEmailExists.CheckIfEmailExitsListener() {
+                                                    @Override
+                                                    public void onPostExecuteConcluded(boolean result) {
+                                                        if (result == false) {
+                                                            AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
+                                                            builder.setTitle(R.string.attention);
+                                                            builder.setMessage(R.string.error_email_not_existing);
+                                                            builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+
+                                                                }
+                                                            });
+
+
+                                                            builder.show();
+
+                                                        } else {
+                                                            AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
+                                                            builder.setTitle(R.string.attention);
+                                                            builder.setMessage(R.string.error_log_in);
+                                                            builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int id) {
+
+                                                                }
+                                                            });
+
+
+                                                            builder.show();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                        } else {
+                            passwordErrorTextView.setText(R.string.error_password_not_valid);
+                        }
+                    } else {
+                        if (!isValidPassword(editTextPassword.getText().toString()) && editTextPassword.getText().toString().isEmpty()) {
+                            passwordErrorTextView.setText(R.string.error_password_not_valid);
+                        }
+                        emailErrorTextView.setText(R.string.error_email_not_valid);
+                    }
+
+                }
+            });
+        }catch (Exception e){
+
+        }
     }
 
-    public boolean isEmailValid(String email)
-    {
+    public boolean isEmailValid(String email) {
         String regExpn =
                 "^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
-                        +"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
-                        +"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                        +"[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-                        +"([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
+                        + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                        + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                        + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                        + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$";
 
         CharSequence inputStr = email;
 
         Pattern pattern = Pattern.compile(regExpn, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(inputStr);
 
-        if(matcher.matches())
+        if (matcher.matches())
             return true;
         else
             return false;
@@ -170,13 +262,11 @@ public class LogInActivity extends AppCompatActivity {
     }
 
 
-
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
-
 
 
 }

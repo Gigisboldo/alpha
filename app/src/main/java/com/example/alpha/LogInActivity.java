@@ -29,12 +29,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LogInActivity extends AppCompatActivity {
+    private enum ChooseLayout {
+        ACTIVITY_LOG_IN,
+        ACTIVITY_LOG_ON,
+    }
 
     private EditText editTextEmail;
     private TextView emailErrorTextView;
     private EditText editTextPassword;
     private TextView passwordErrorTextView;
     private TextView connectionInfoTextView;
+    private TextView editTextConfirmPassword;
+    private TextView confirmPasswordErrorTextView;
+    private EditText nicknameEditText;
     private Button confirmRegistrationButton;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -42,31 +49,60 @@ public class LogInActivity extends AppCompatActivity {
     private CheckIfEmailExists checkIfEmailExists;
     private String email;
     private String password;
+    private ChooseLayout choosenLayout = ChooseLayout.ACTIVITY_LOG_IN;
 
-    private enum ChooseLayout {
-        ACTIVITY_LOG_IN,
-        ACTIVITY_LOG_ON,
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_in);
+        Bundle extras = getIntent().getExtras();
         try {
             db = new DbManager(this);
             mAuth = FirebaseAuth.getInstance();
-            editTextEmail = (EditText) findViewById(R.id.editTextEmail);
-            emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextView);
-            editTextPassword = (EditText) findViewById(R.id.editTextPassword);
-            passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextView);
-            connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextView);
-            confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButton);
-            checkIfEmailExists = new CheckIfEmailExists();
         } catch (Exception e) {
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
         }
+        if (extras != null && extras.getString("Type").equals("LogInActivity")) {
+            setContentView(R.layout.activity_log_in);
+            try {
+
+                editTextEmail = (EditText) findViewById(R.id.editTextEmailLogIn);
+                emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextViewLogIn);
+                editTextPassword = (EditText) findViewById(R.id.editTextPasswordLogIn);
+                passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextViewLogIn);
+                connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextViewLogIn);
+                confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButtonLogIn);
+                connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoTextViewLogIn);
+                checkIfEmailExists = new CheckIfEmailExists();
+
+
+            } catch (Exception e) {
+                Toast.makeText(LogInActivity.this, e.toString(),
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            choosenLayout = ChooseLayout.ACTIVITY_LOG_ON;
+            setContentView(R.layout.activity_log_on);
+            try {
+                editTextEmail = (EditText) findViewById(R.id.editTextEmailLogOn);
+                emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextViewLogOn);
+                editTextPassword = (EditText) findViewById(R.id.editTextPasswordLogOn);
+                passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextViewLogOn);
+                connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoLogOn);
+                confirmRegistrationButton = (Button) findViewById(R.id.confirmRegistrationButtonLogOn);
+                connectionInfoTextView = (TextView) findViewById(R.id.connectionInfoLogOn);
+                editTextConfirmPassword = (TextView) findViewById(R.id.editTextPasswordLogOn);
+                confirmPasswordErrorTextView = (TextView) findViewById(R.id.confirmPasswordErrorTextViewLogOn);
+                nicknameEditText = (EditText) findViewById(R.id.nicknameEditTextLogOn);
+            } catch (Exception e) {
+                Toast.makeText(LogInActivity.this, e.toString(),
+                        Toast.LENGTH_LONG).show();
+            }
+
+        }
     }
+
 
     @Override
     public void onStart() {
@@ -227,7 +263,7 @@ public class LogInActivity extends AppCompatActivity {
 
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
     }

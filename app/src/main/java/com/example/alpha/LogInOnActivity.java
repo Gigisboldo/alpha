@@ -90,6 +90,7 @@ public class LogInOnActivity extends AppCompatActivity {
             int icount = crs.getCount();
             logInButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+                    LogInActivityIntent.putExtra("Type","LogInActivity");
                     startActivity(LogInActivityIntent);
                 }
             });

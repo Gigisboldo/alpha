@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+
+    android:layout_below="@+id/name"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <EditText
+        android:id="@+id/editTextEmailLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:inputType="textEmailAddress"
+        android:hint="@string/email" />
+
+
+    <TextView
+        android:id="@+id/emailErrorTextViewLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000"/>
+
+    <EditText
+            android:id="@+id/editTextPasswordLogOn"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:inputType="textPassword"
+            android:layout_marginTop="10dp"
+            android:hint="@string/password"
+            />
+    <TextView
+        android:id="@+id/passwordErrorTextViewLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000"
+        />
+
+        <EditText
+            android:id="@+id/editTextConfirmPasswordLogOn"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:inputType="textPassword"
+            android:hint="@string/confirm_password"
+            />
+
+    <TextView
+        android:id="@+id/confirmPasswordErrorTextViewLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000" />
+    <EditText
+        android:id="@+id/nicknameEditTextLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/nickname" />
+    <TextView
+        android:id="@+id/connectionInfoLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FF0000" />
+    <Button
+        android:id="@+id/confirmRegistrationButtonLogOn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm" />
+</LinearLayout>

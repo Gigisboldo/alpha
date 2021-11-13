@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
@@ -50,6 +51,7 @@ public class LogInActivity extends AppCompatActivity {
     private String email;
     private String password;
     private ChooseLayout choosenLayout = ChooseLayout.ACTIVITY_LOG_IN;
+    private Intent mainActivityIntent;
 
 
     @Override
@@ -59,6 +61,7 @@ public class LogInActivity extends AppCompatActivity {
         try {
             db = new DbManager(this);
             mAuth = FirebaseAuth.getInstance();
+            mainActivityIntent = new Intent(LogInActivity.this, MainActivity.class);
         } catch (Exception e) {
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
@@ -165,6 +168,7 @@ public class LogInActivity extends AppCompatActivity {
                 }
             });
 
+            if(choosenLayout.equals(ChooseLayout.ACTIVITY_LOG_IN)){
             confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     if (isEmailValid(editTextEmail.getText().toString()) && !editTextEmail.getText().toString().isEmpty()) {
@@ -183,15 +187,10 @@ public class LogInActivity extends AppCompatActivity {
                                                         mGetUserNickname.setListener(new GetUserNickname.GetUserNicknameListener() {
                                                             @Override
                                                             public void onPostExecuteConcluded(String nickNameResult) {
-
-                                                                if (nickNameResult.equals("")) {
-                                                                    db.saveNewUser("", user.getUid(), "", editTextEmail.getText().toString(),
-                                                                            editTextPassword.getText().toString());
-                                                                    //TODO go to nickname activity
-                                                                } else {
+                                                                    //TODO search for imageUser
                                                                     db.saveNewUser("", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                                    startActivity(mainActivityIntent);
 
-                                                                }
                                                             }
                                                         });
                                                     } else {
@@ -263,6 +262,9 @@ public class LogInActivity extends AppCompatActivity {
 
                 }
             });
+        }else{
+
+            }
         } catch (Exception e) {
 
         }

@@ -48,6 +48,7 @@ public class LogInOnActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in_on);
+        //Set the layout to choose the user for login
         _listType = listType.logInUser;
         try {
             db = new DbManager(this);
@@ -72,6 +73,7 @@ public class LogInOnActivity extends AppCompatActivity {
         super.onStart();
         //Procedure to log in on activity
         try {
+            //set the clicklistener if the user wants to delete a user
             deleteUser.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
 
@@ -88,12 +90,15 @@ public class LogInOnActivity extends AppCompatActivity {
 
             crs.moveToFirst();
             int icount = crs.getCount();
+            //Set the clicklistener for the LogInActivity for log in
             logInButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     LogInActivityIntent.putExtra("Type","LogInActivity");
+                    LogInActivityIntent.putExtra("Email","empty");
                     startActivity(LogInActivityIntent);
                 }
             });
+            //Set the clicklistener for the LogInActivity for log on with a new user
             logOnButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     //TODO start log on procedure
@@ -106,6 +111,7 @@ public class LogInOnActivity extends AppCompatActivity {
 
 
             } else {
+                //default option list of the users logged in
                 for (int i = 0; i < icount; i++) {
                     crs.moveToPosition(i);
                     list.add(new Users(crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_NICKNAME))), crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))), crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_USER_IMAGE))));
@@ -121,35 +127,42 @@ public class LogInOnActivity extends AppCompatActivity {
 
                         if (_listType.equals(listType.logInUser)) {
                             crs.moveToPosition(position);
+                            //Sign in with the user clicked
+                            //if the user before log out doesn't want to delete password
+                            if(!crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD))).equals("")) {
+                                mAuth.signInWithEmailAndPassword(crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))), crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD)))).addOnCompleteListener(LogInOnActivity.this, new OnCompleteListener<AuthResult>() {
 
-                            mAuth.signInWithEmailAndPassword(crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))), crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD)))).addOnCompleteListener(LogInOnActivity.this, new OnCompleteListener<AuthResult>() {
+                                    @SuppressLint("Range")
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
 
-                                @SuppressLint("Range")
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            // Sign in success, update UI with the signed-in user's information
+                                            FirebaseUser user = mAuth.getCurrentUser();
+                                            startActivity(mainActivityIntent);
 
-                                    if (task.isSuccessful()) {
-                                        // Sign in success, update UI with the signed-in user's information
-                                        FirebaseUser user = mAuth.getCurrentUser();
-                                        startActivity(mainActivityIntent);
+                                        } else {
+                                            // If sign in fails, display a message to the user.
 
-                                    } else {
-                                        // If sign in fails, display a message to the user.
+                                            Toast.makeText(LogInOnActivity.this, "Authentication failed.",
+                                                    Toast.LENGTH_SHORT).show();
 
-                                        Toast.makeText(LogInOnActivity.this, "Authentication failed.",
-                                                Toast.LENGTH_SHORT).show();
+                                            db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
+                                            list.clear();
+                                            recreate();
 
-                                        db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
-                                        list.clear();
-                                        recreate();
+
+                                        }
 
 
                                     }
-
-
-                                }
-                            });
-
+                                });
+                            }else{
+                                //if the user before log out want to delete password will be send to LogInActivity with with thew mail saved
+                                LogInActivityIntent.putExtra("Type","LogInActivity");
+                                LogInActivityIntent.putExtra("Email",crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))));
+                                startActivity(LogInActivityIntent);
+                            }
                         } else {
                             crs.moveToPosition(position);
                             db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));

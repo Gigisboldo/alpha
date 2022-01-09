@@ -66,11 +66,16 @@ public class LogInActivity extends AppCompatActivity {
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
         }
+        //Set the layout as a log in layout
         if (extras != null && extras.getString("Type").equals("LogInActivity")) {
             setContentView(R.layout.activity_log_in);
             try {
 
                 editTextEmail = (EditText) findViewById(R.id.editTextEmailLogIn);
+                //set the e mail if the user isn't the first time that is logged in
+                if(!extras.getString("Email").equals("empty")){
+                    editTextEmail.setText(extras.getString("Email"));
+                }
                 emailErrorTextView = (TextView) findViewById(R.id.emailErrorTextViewLogIn);
                 editTextPassword = (EditText) findViewById(R.id.editTextPasswordLogIn);
                 passwordErrorTextView = (TextView) findViewById(R.id.passwordErrorTextViewLogIn);
@@ -85,6 +90,7 @@ public class LogInActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG).show();
             }
         } else {
+            //set the layout as a log on layout
             choosenLayout = ChooseLayout.ACTIVITY_LOG_ON;
             setContentView(R.layout.activity_log_on);
             try {
@@ -167,7 +173,7 @@ public class LogInActivity extends AppCompatActivity {
 
                 }
             });
-
+            //Procedure for the log in
             if(choosenLayout.equals(ChooseLayout.ACTIVITY_LOG_IN)){
             confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

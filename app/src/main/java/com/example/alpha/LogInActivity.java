@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.alpha.DbManager.DbManager;
 import com.example.alpha.FirebaseActions.CheckIfEmailExists;
 import com.example.alpha.FirebaseActions.GetUserNickname;
+import com.example.alpha.FirebaseActions.ProfileImages;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -193,7 +194,10 @@ public class LogInActivity extends AppCompatActivity {
                                                         mGetUserNickname.setListener(new GetUserNickname.GetUserNicknameListener() {
                                                             @Override
                                                             public void onPostExecuteConcluded(String nickNameResult) {
-                                                                    //TODO search for imageUser
+                                                                    //TODO  check conection
+                                                                //Check if the user has a profile image
+                                                                    ProfileImages mProfileImages = new ProfileImages();
+                                                                    mProfileImages.DownloadProfilePhoto(mAuth.getCurrentUser().toString(),LogInActivity.this);
                                                                     db.saveNewUser("", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
                                                                     startActivity(mainActivityIntent);
 
@@ -225,7 +229,7 @@ public class LogInActivity extends AppCompatActivity {
                                                 checkIfEmailExists.setListener(new CheckIfEmailExists.CheckIfEmailExitsListener() {
                                                     @Override
                                                     public void onPostExecuteConcluded(boolean result) {
-                                                        if (result == false) {
+                                                        if (!result) {
                                                             AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
                                                             builder.setTitle(R.string.attention);
                                                             builder.setMessage(R.string.error_email_not_existing);

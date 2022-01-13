@@ -158,7 +158,7 @@ public class LogInOnActivity extends AppCompatActivity {
                                     }
                                 });
                             }else{
-                                //if the user before log out want to delete password will be send to LogInActivity with with thew mail saved
+                                //if the user before log out want to delete password will be send to LogInActivity with the mail saved
                                 LogInActivityIntent.putExtra("Type","LogInActivity");
                                 LogInActivityIntent.putExtra("Email",crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))));
                                 startActivity(LogInActivityIntent);

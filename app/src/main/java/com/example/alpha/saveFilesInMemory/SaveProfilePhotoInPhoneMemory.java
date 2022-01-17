@@ -46,7 +46,7 @@ public class SaveProfilePhotoInPhoneMemory {
             direct.mkdirs();
         }else{}
 
-        File file = new File(context.getExternalFilesDir(userUid + "/Pictures/profileImage").getAbsolutePath() , fileName+".jpg");
+        File file = new File(context.getExternalFilesDir(userUid + "/Pictures/profileImage").getAbsolutePath() , "profileImage" + userUid + ".jpg");
         if (file.exists()) {
             file.delete();
         }else{

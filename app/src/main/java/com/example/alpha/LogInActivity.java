@@ -27,6 +27,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,12 +178,15 @@ public class LogInActivity extends AppCompatActivity {
             //Procedure for the log in
             if(choosenLayout.equals(ChooseLayout.ACTIVITY_LOG_IN)){
             confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
+
                 public void onClick(View v) {
                     if (isEmailValid(editTextEmail.getText().toString()) && !editTextEmail.getText().toString().isEmpty()) {
 
                         if (isValidPassword(editTextPassword.getText().toString()) && !editTextPassword.getText().toString().isEmpty()) {
+                            if(isNetworkConnected()){
                             mAuth.signInWithEmailAndPassword(editTextEmail.getText().toString(), editTextPassword.getText().toString())
                                     .addOnCompleteListener(LogInActivity.this, new OnCompleteListener<AuthResult>() {
+
                                         @Override
                                         public void onComplete(@NonNull Task<AuthResult> task) {
                                             if (task.isSuccessful()) {
@@ -191,20 +195,27 @@ public class LogInActivity extends AppCompatActivity {
                                                     if (user.isEmailVerified()) {
                                                         GetUserNickname mGetUserNickname = new GetUserNickname();
                                                         mGetUserNickname.getUserNickNameInFirestore(user);
+
                                                         mGetUserNickname.setListener(new GetUserNickname.GetUserNicknameListener() {
                                                             @Override
                                                             public void onPostExecuteConcluded(String nickNameResult) {
-                                                                    //TODO  check conection
-                                                                //Check if the user has a profile image
+
+                                                                    //Check if the user has a profile image
                                                                     ProfileImages mProfileImages = new ProfileImages();
-                                                                    mProfileImages.DownloadProfilePhoto(mAuth.getCurrentUser().toString(),LogInActivity.this);
-                                                                    db.saveNewUser("", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                                    mProfileImages.DownloadProfilePhoto(mAuth.getCurrentUser().toString(), LogInActivity.this);
+
+                                                                    if (!userHasImageProfile(LogInActivity.this, user.getUid().toString())) {
+                                                                        db.saveNewUser("", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                                    } else {
+                                                                        db.saveNewUser("profileImage" + user.getUid() + ".jpg", user.getUid(), nickNameResult, editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                                    }
                                                                     startActivity(mainActivityIntent);
 
                                                             }
                                                         });
+
                                                     } else {
-                                                        db.saveNewUser("", user.getUid(), "", editTextEmail.getText().toString(), editTextPassword.getText().toString());
+                                                        db.saveNewUser("", user.getUid().toString(), "", editTextEmail.getText().toString(), editTextPassword.getText().toString());
                                                         //TODO start email verify intent
                                                     }
 
@@ -260,6 +271,10 @@ public class LogInActivity extends AppCompatActivity {
                                             }
                                         }
                                     });
+                        }else{
+                            Toast.makeText(LogInActivity.this, R.string.no_connection_info,
+                                    Toast.LENGTH_LONG).show();
+                        }
                         } else {
                             passwordErrorTextView.setText(R.string.error_password_not_valid);
                         }
@@ -319,6 +334,16 @@ public class LogInActivity extends AppCompatActivity {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
+    private boolean userHasImageProfile(Context ctx, String user){
+        File file = new File(ctx.getExternalFilesDir(mAuth.getCurrentUser().toString() + "/Pictures/profileImage").getAbsolutePath() , "profileImage" + user+".jpg");
+        if (file.exists()) {
+           return true;
+        }else{
+        return  false;
+        }
+
     }
 
 

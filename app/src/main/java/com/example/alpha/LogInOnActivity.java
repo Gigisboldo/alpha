@@ -4,9 +4,11 @@ package com.example.alpha;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -121,57 +123,62 @@ public class LogInOnActivity extends AppCompatActivity {
                 CustomAdapter adapter = new CustomAdapter(this, R.layout.users_log_on_custom, list);
                 usersListView.setAdapter(adapter);
                 usersListView.setClickable(true);
-                usersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                if(isNetworkConnected()) {
+                    usersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                    @SuppressLint("Range")
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1, final int position, long arg3) {
+                        @SuppressLint("Range")
+                        @Override
+                        public void onItemClick(AdapterView<?> arg0, View arg1, final int position, long arg3) {
 
-                        if (_listType.equals(listType.logInUser)) {
-                            crs.moveToPosition(position);
-                            //Sign in with the user clicked
-                            //if the user before log out doesn't want to delete password
-                            if(!crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD))).equals("")) {
-                                mAuth.signInWithEmailAndPassword(crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))), crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD)))).addOnCompleteListener(LogInOnActivity.this, new OnCompleteListener<AuthResult>() {
+                            if (_listType.equals(listType.logInUser)) {
+                                crs.moveToPosition(position);
+                                //Sign in with the user clicked
+                                //if the user before log out doesn't want to delete password
+                                if (!crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD))).equals("")) {
+                                    mAuth.signInWithEmailAndPassword(crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))), crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_PASSWORD)))).addOnCompleteListener(LogInOnActivity.this, new OnCompleteListener<AuthResult>() {
 
-                                    @SuppressLint("Range")
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        @SuppressLint("Range")
+                                        @Override
+                                        public void onComplete(@NonNull Task<AuthResult> task) {
 
-                                        if (task.isSuccessful()) {
-                                            // Sign in success, update UI with the signed-in user's information
-                                            FirebaseUser user = mAuth.getCurrentUser();
-                                            startActivity(mainActivityIntent);
+                                            if (task.isSuccessful()) {
+                                                // Sign in success, update UI with the signed-in user's information
+                                                FirebaseUser user = mAuth.getCurrentUser();
+                                                startActivity(mainActivityIntent);
 
-                                        } else {
-                                            // If sign in fails, display a message to the user.
+                                            } else {
+                                                // If sign in fails, display a message to the user.
 
-                                            Toast.makeText(LogInOnActivity.this, "Authentication failed.",
-                                                    Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(LogInOnActivity.this, "Authentication failed.",
+                                                        Toast.LENGTH_SHORT).show();
 
-                                            db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
-                                            list.clear();
-                                            recreate();
+                                                db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
+                                                list.clear();
+                                                recreate();
+
+
+                                            }
 
 
                                         }
-
-
-                                    }
-                                });
-                            }else{
-                                //if the user before log out want to delete password will be send to LogInActivity with the mail saved
-                                LogInActivityIntent.putExtra("Type","LogInActivity");
-                                LogInActivityIntent.putExtra("Email",crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))));
-                                startActivity(LogInActivityIntent);
+                                    });
+                                } else {
+                                    //if the user before log out want to delete password will be send to LogInActivity with the mail saved
+                                    LogInActivityIntent.putExtra("Type", "LogInActivity");
+                                    LogInActivityIntent.putExtra("Email", crs.getString((crs.getColumnIndex(DatabaseStrings.FIELD_MAIL))));
+                                    startActivity(LogInActivityIntent);
+                                }
+                            } else {
+                                crs.moveToPosition(position);
+                                db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
+                                recreate();
                             }
-                        } else {
-                            crs.moveToPosition(position);
-                            db.deleteUser(crs.getInt(crs.getColumnIndex(DatabaseStrings.FIELD_ID)));
-                            recreate();
                         }
-                    }
-                });
+                    });
+                }else{
+                    Toast.makeText(LogInOnActivity.this, R.string.no_connection_info,
+                            Toast.LENGTH_LONG).show();
+                }
             }
 
         } catch (Exception e) {
@@ -212,5 +219,10 @@ public class LogInOnActivity extends AppCompatActivity {
 
         return matcher.matches();
 
+    }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 }

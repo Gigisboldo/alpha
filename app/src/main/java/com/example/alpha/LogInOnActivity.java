@@ -101,7 +101,9 @@ public class LogInOnActivity extends AppCompatActivity {
             //Set the clicklistener for the LogInActivity for log on with a new user
             logOnButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    //TODO start log on procedure
+                    LogInActivityIntent.putExtra("Type","LogOnActivity");
+                    LogInActivityIntent.putExtra("Email","empty");
+                    startActivity(LogInActivityIntent);
                 }
             });
 

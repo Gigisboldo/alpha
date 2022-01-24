@@ -3,6 +3,7 @@
     package="com.example.alpha">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,6 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Alpha">
+        <activity
+            android:name=".ChangeEmailAddress"
+            android:exported="false" />
+        <activity
+            android:name=".VerifyEmail"
+            android:exported="false" />
         <activity
             android:name=".LogInActivity"
             android:exported="false" />

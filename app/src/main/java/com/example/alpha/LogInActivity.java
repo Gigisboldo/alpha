@@ -2,7 +2,6 @@ package com.example.alpha;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.alpha.DbManager.DbManager;
 import com.example.alpha.FirebaseActions.CheckIfEmailExists;
 import com.example.alpha.FirebaseActions.GetUserNickname;
@@ -30,7 +28,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
@@ -44,6 +41,8 @@ public class LogInActivity extends AppCompatActivity {
         ACTIVITY_LOG_ON,
     }
 
+
+    //TODO check if nickname exist and retry log in and log on
     private EditText editTextEmail;
     private TextView emailErrorTextView;
     private EditText editTextPassword;

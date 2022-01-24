@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                                         //if the user has completed the log on process Mainactivity will change the layout to first layout
                                         choosenLayout = ChooseLayout.ACTIVITY_FIRST;
                                         setContentView(R.layout.activity_first);
+                                        //TODO try log in first
 
                                     } else {
                                         //if the user has not completed the log on process will be redirected to the log in on activity

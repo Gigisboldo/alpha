@@ -22,12 +22,19 @@ import com.example.alpha.FirebaseActions.CheckIfEmailExists;
 import com.example.alpha.FirebaseActions.GetUserNickname;
 import com.example.alpha.FirebaseActions.ProfileImages;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +61,8 @@ public class LogInActivity extends AppCompatActivity {
     private String password;
     private ChooseLayout choosenLayout = ChooseLayout.ACTIVITY_LOG_IN;
     private Intent mainActivityIntent;
+    private Intent verifyEmailIntent;
+    private Intent logInOnIntent;
 
 
     @Override
@@ -64,6 +73,8 @@ public class LogInActivity extends AppCompatActivity {
             db = new DbManager(this);
             mAuth = FirebaseAuth.getInstance();
             mainActivityIntent = new Intent(LogInActivity.this, MainActivity.class);
+            verifyEmailIntent = new Intent(LogInActivity.this, VerifyEmail.class);
+            logInOnIntent = new Intent(LogInActivity.this,LogInOnActivity.class);
         } catch (Exception e) {
             Toast.makeText(LogInActivity.this, e.toString(),
                     Toast.LENGTH_LONG).show();
@@ -216,7 +227,7 @@ public class LogInActivity extends AppCompatActivity {
 
                                                     } else {
                                                         db.saveNewUser("", user.getUid().toString(), "", editTextEmail.getText().toString(), editTextPassword.getText().toString());
-                                                        //TODO start email verify intent
+
                                                     }
 
                                                 } else {
@@ -289,6 +300,98 @@ public class LogInActivity extends AppCompatActivity {
             });
         }else{
 
+                //Procedure for Log on
+                confirmRegistrationButton.setOnClickListener(new View.OnClickListener() {
+
+                    public void onClick(View v) {
+                        if (isEmailValid(editTextEmail.getText().toString()) && !editTextEmail.getText().toString().isEmpty()) {
+
+                            if (isValidPassword(editTextPassword.getText().toString()) && !editTextPassword.getText().toString().isEmpty()) {
+                                if(isNetworkConnected()){
+                                    mAuth.createUserWithEmailAndPassword(editTextEmail.getText().toString(), editTextPassword.getText().toString())
+                                            .addOnCompleteListener(
+                                                    new OnCompleteListener<AuthResult>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                                            if (!task.isSuccessful()) {
+                                                                try {
+                                                                    throw task.getException();
+                                                                } catch (FirebaseAuthUserCollisionException existEmail) {
+                                                                    AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
+                                                                    builder.setTitle(R.string.attention);
+                                                                    builder.setMessage(R.string.existing_email);
+                                                                    builder.setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
+                                                                        public void onClick(DialogInterface dialog, int id) {
+                                                                            // User clicked OK button
+                                                                        }
+                                                                    });
+
+                                                                    builder.setPositiveButton(R.string.go_to_log_in, new DialogInterface.OnClickListener() {
+                                                                        public void onClick(DialogInterface dialog, int id) {
+                                                                            startActivity(logInOnIntent);
+                                                                        }
+                                                                    });
+
+
+                                                                    builder.show();
+
+                                                                } catch (Exception e) {
+                                                                    emailErrorTextView.setText("onComplete: " + e.getMessage());
+                                                                }
+                                                            } else {
+                                                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                                                db.saveNewUser(CommonVariables.DEFAULT_USER_IMAGE, user.getUid(), "", user.getEmail(), editTextPassword.getText().toString());
+
+                                                                createNewUserInFirestore(user.getEmail(), user.getUid());
+
+                                                                user.sendEmailVerification()
+                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if (task.isSuccessful()) {
+                                                                                    startActivity(verifyEmailIntent);
+
+
+                                                                                    finish();
+                                                                                } else {
+                                                                                    AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
+                                                                                    builder.setTitle(R.string.attention);
+                                                                                    builder.setMessage(R.string.error_send_verification_email);
+                                                                                    builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                                                                                        public void onClick(DialogInterface dialog, int id) {
+
+                                                                                        }
+                                                                                    });
+
+
+                                                                                    builder.show();
+
+
+                                                                                }
+                                                                            }
+                                                                        });
+
+
+                                                            }
+                                                        }
+                                                    }
+                                            );
+                                }else{
+                                    Toast.makeText(LogInActivity.this, R.string.no_connection_info,
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                passwordErrorTextView.setText(R.string.error_password_not_valid);
+                            }
+                        } else {
+                            if (!isValidPassword(editTextPassword.getText().toString()) && editTextPassword.getText().toString().isEmpty()) {
+                                passwordErrorTextView.setText(R.string.error_password_not_valid);
+                            }
+                            emailErrorTextView.setText(R.string.error_email_not_valid);
+                        }
+
+                    }
+                });
             }
         } catch (Exception e) {
 
@@ -345,6 +448,31 @@ public class LogInActivity extends AppCompatActivity {
         }
 
     }
+
+    public void createNewUserInFirestore(String email, String uid){
+        FirebaseFirestore dbFirestore = FirebaseFirestore.getInstance();
+        Map<String, Object> user = new HashMap<>();
+        user.put("email", email);
+        user.put("uid", uid);
+        user.put("lang", Locale.getDefault().getISO3Language());
+        dbFirestore.collection("users").document(uid)
+                .set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+
+
+    }
+
 
 
 }

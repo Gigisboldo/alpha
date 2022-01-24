@@ -121,7 +121,7 @@ public class VerifyEmail extends AppCompatActivity {
 
                         }
 
-                        // ...
+
                     }
                 });
 
